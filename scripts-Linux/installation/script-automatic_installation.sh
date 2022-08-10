@@ -20,9 +20,23 @@ mAchat="Quand c'est fait, presser la touche Entrée pour déclencher l'achat d'u
 mWait="Attendre 10s"
 mDone="C'est fait !"
 mNewWallet="Créer un nouveau wallet"
+mCreateDirectory="Dossier créé $massaDirectory"
+mInstallPackages="Installation des paquets nécessaires"
+mSearchWalletDat="existe-t-il un fichier wallet.dat ?"
+mBootstrapInProgress="Bootstrap en cours"
+mBuyDone="Achat fait, il faut attendre 3 cycles pour les jetons deviennent actifs"
+mEndMessage="Votre node fonctionne en tâche de fond.\n"
+mFireWall="Ouverture des ports\n31244 : communication entre les noeuds\n31245 : démarrage d'un noeud\n33035 : surveillance activité du noeud"
+mEndMessage=""
+
+#add package
+echo -e "$mInstallPackages"
+sudo apt install wget curl locate ufw
+sudo updatedb
+
 
 # create a new user ?
-echo "$qNewUser"
+echo
 read -p "$qNewUser" rep
 if [ $rep == $yes ]
 	then
@@ -30,8 +44,8 @@ if [ $rep == $yes ]
 	read -p "$qUserName" userName
 	read -s -p "$qPassword" passWord
 	echo
-	#pass=$(perl -e 'print crypt($ARGV[0], "passWord")' $passWord)
-	#useradd -m -p "$pass" "$userName"
+	pass=$(perl -e 'print crypt($ARGV[0], "passWord")' $passWord)
+	useradd -m -p "$pass" "$userName"
 fi
 
 # directory for Massa
@@ -39,84 +53,123 @@ echo
 read -e -p "$qDirectoryOfMassa" -i "/home/$(whoami)/MASSA" massaDirectory
 echo "$massaDirectory"
 if [ ! -d "$massaDirectory" ]
+	then
 	mkdir "$massaDirectory"
+	echo "$mCreateDirectory"
+fi
 cd "$massaDirectory"
 
 # Current massa version
 version=$(curl -s https://github.com/massalabs/massa | grep "tag/TEST" | awk -F '/' '{print $6}' | sed 's/">//')
 echo "$tMassaVersion $version"
-#~ wget https://github.com/massalabs/massa/releases/download/$version/massa_"$version"_release_linux.tar.gz
-#~ tar xzf massa_"$version"_release_linux.tar.gz
-#~ mv ./massa ./massa-"$version"
-#~ ln -s ./massa-"$version" ./massa
+wget https://github.com/massalabs/massa/releases/download/$version/massa_"$version"_release_linux.tar.gz
+tar xzf massa_"$version"_release_linux.tar.gz
+mv ./massa ./massa-"$version"
+ln -s ./massa-"$version" ./massa
 
 # Create config.toml
-cd "$massaDirectory"/massa-node/config
+cd "$massaDirectory"/massa/massa-node/config
+wget http://massa.alphatux.fr/bootstrapper.toml
 ipv4=$(curl ifconfig.me)
 ipv6=$(curl ifconfig.co)
 echo
+echo -e "ipv4 : $ipv4\n ipv6 $ipv6 "
 read -p "$qWhatIP" rep
 echo "[network]" > ./config.toml
-if [ $rep == "4"]
+if [ $rep == "4" ]
 	then
-	echo "	routable_ip = \"$ipv4\""
+	echo -e "	routable_ip = \"$ipv4\"\n" >> ./config.toml
 	else
-	echo "	routable_ip = \"$ipv6\""
+	echo -e "	routable_ip = \"$ipv6\"\n" >> ./config.toml
+fi
+cat bootstrapper.toml >> ./config.toml
+echo -e "retry_delay = 15000\n" >> ./config.toml
 
-# Running the node
+#password of massa-node and massa-client
 echo
 read -p "$qpassWordNode" passWordNode
-echo "$tRunningNode1 $passWordNode $tRunningNode1"
-cd "$massaDirectory"/massa-node
-logfile="$massaDirectory/massa-node/Node-$(date +%F_%T).log"
-nohup ./massa-node -p $passWordNode &>> ~/$logfile &
-
-while [ "$(grep "Successful bootstrap" $logfile)" = "" ]
-	do
-	sleep 10s
-	echo "$mWaitBootStrap"
-	done
-echo "$mSuccessfulBootstrap"
+echo "$tRunningNode1 - $passWordNode - $tRunningNode2"
 
 #configure and/or create wallet
 function createWallet()
 {
 	echo -e "$mCreateWallet"
-	cd "$massaDirectory"/massa-client
+	cd "$massaDirectory"/massa/massa-client
 	./massa-client -p $passWordNode wallet_generate_secret_key
 	echo "$mAddStaking"
-	./massa-client -p $passWordNode "node_add_staking_secret_keys $(./massa-client -p $passWordNode wallet_info | grep "Secret key" | sed 's/Secret key\: //g')"
+	secretKey=$(./massa-client -p $passWordNode wallet_info | grep "Secret key" | sed 's/Secret key\: //g')
+	echo "node_add_staking_secret_keys $secretKey"
+	./massa-client -p $passWordNode node_add_staking_secret_keys $secretKey
 }
 
+function runNode()
+{
+	cd "$massaDirectory"/massa/massa-node
+	logfile=$1
+	nohup ./massa-node -p $passWordNode &>> $logfile &
+	sleep 2s
+	echo "$mBootstrapInProgress"
+	while [ "$(grep "Successful bootstrap" $logfile)" == "" ]
+		do
+		sleep 10s
+		echo "$mWaitBootStrap"
+		done
+	echo "$mSuccessfulBootstrap"
+}
+
+echo
+echo -e "$mSearchWalletDat"
 nWalletDat=$(locate wallet.dat | wc -l)
-if [[ $n -eq 0 ]]
+if [[ $nWalletDat -gt 0 ]]
 	then
-		createWallet
-	else
 		thelistofwallet=$(echo -e "$(locate wallet.dat)\n$mNewWallet" | cat -n)
-		nWallet=$(echo "$thelistofwallet" | wc -l)
 		echo "$thelistofwallet"
-		echo "$qChooseWallet" rep
-		if [[ $nWallet == $rep ]]
+		read -p "$qChooseWallet" rep
+		if [[ $(($nWalletDat+1)) == $rep ]]
 			then
+			runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
 			createWallet
 			else
-			walletFile=$(echo "$thelistofwallet" | sed -n "$rep p")
-			nodePrivKeyFile=$(echo $(echo "$thelistofwallet" | sed -n "$rep p" | sed 's/client\/wallet.dat//g')"node/config/node_privkey.key")
-			cp $walletFile ./
-			cp $nodePrivKeyFile ../massa-node/config/
+			walletFile=$(echo "$thelistofwallet" | sed -n "$rep p" | sed 's/.*\/h/\/h/g')
+			cp $walletFile "$massaDirectory"/massa/massa-client/
+			thelistofnodePrivKey=$(echo -e "$(locate node_privkey.key)" | cat -n)
+			echo "$thelistofnodePrivKey"
+			echo "On utilise le $rep"
+			nodePrivKeyFile=$(echo "$thelistofnodePrivKey" | sed -n "$rep p" | sed 's/.*\/h/\/h/g')
+			echo "$nodePrivKeyFile"
+			cp "$nodePrivKeyFile" "$massaDirectory"/massa/massa-node/config/
+			runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
+			cd "$massaDirectory"/massa/massa-client
+			secretKey=$(./massa-client -p $passWordNode wallet_info | grep "Secret key" | sed 's/Secret key\: //g')
+			echo "node_add_staking_secret_keys $secretKey"
+			./massa-client -p $passWordNode node_add_staking_secret_keys $secretKey
+		fi
+	else
+		runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
+		createWallet
 fi
 
 #claim de faucet and buy a roll
 echo
-echo "$mFaucet"
+echo -e "$mFaucet"
+cd "$massaDirectory"/massa/massa-client/
 address=$(./massa-client -p $passWordNode wallet_info | grep Address | sed 's/Address: //g')
 echo "$address"
 read -p "$mAchat" rep
+until [[ $finalBalance -gt 0 ]]
 do
 	finalBalance=$(./massa-client -p $passWordNode wallet_info | grep  "Final balance" | sed 's/.*Final balance: //g')
 	sleep 10s
 	echo "$mWait"
-until [[ $finalBalance -gt 0 ]
-./massa-client -p $passWordNode "buy_rolls $address 1 0"
-echo "$mDone"
+done
+./massa-client -p $passWordNode buy_rolls $address 1 0
+echo "$mBuyDone"
+
+#open ports 31244 31245 et 33035
+echo
+echo -e "$mFireWall"
+sudo ufw allow 31244
+sudo ufw allow 31245
+sudo ufw allow 33035
+
+echo -e "$mEndMessage"
