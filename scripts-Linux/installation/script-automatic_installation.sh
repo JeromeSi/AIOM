@@ -78,17 +78,17 @@ if hostnamectl | grep "22.04"
 fi
 
 # create a new user ?
-echo
-read -p "$qNewUser" rep
-if [ $rep == $yes ]
-	then
-	echo
-	read -p "$qUserName" userName
-	read -s -p "$qPassword" passWord
-	echo
-	pass=$(perl -e 'print crypt($ARGV[0], "passWord")' $passWord)
-	useradd -m -p "$pass" "$userName"
-fi
+#~ echo
+#~ read -p "$qNewUser" rep
+#~ if [ $rep == $yes ]
+	#~ then
+	#~ echo
+	#~ read -p "$qUserName" userName
+	#~ read -s -p "$qPassword" passWord
+	#~ echo
+	#~ pass=$(perl -e 'print crypt($ARGV[0], "passWord")' $passWord)
+	#~ useradd -m -p "$pass" "$userName"
+#~ fi
 
 # directory for Massa
 echo
