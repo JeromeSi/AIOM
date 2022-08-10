@@ -1,3 +1,7 @@
+# GNU GENERAL PUBLIC LICENSE Version 3
+# https://github.com/JeromeSi/AIOM/blob/main/scripts-Linux/installation/script-automatic_installation.sh
+# by Jerome Signouret
+
 #!/bin/bash
 yes="y"
 no="n"
