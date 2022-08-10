@@ -38,7 +38,6 @@ echo -e "$mInstallPackages"
 sudo apt install wget curl locate ufw
 sudo updatedb
 
-
 # create a new user ?
 echo
 read -p "$qNewUser" rep
