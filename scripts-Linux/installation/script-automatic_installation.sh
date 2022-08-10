@@ -65,14 +65,14 @@ cd "$massaDirectory"
 # Current massa version
 version=$(curl -s https://github.com/massalabs/massa | grep "tag/TEST" | awk -F '/' '{print $6}' | sed 's/">//')
 echo "$tMassaVersion $version"
-wget https://github.com/massalabs/massa/releases/download/$version/massa_"$version"_release_linux.tar.gz
+wget -q https://github.com/massalabs/massa/releases/download/$version/massa_"$version"_release_linux.tar.gz
 tar xzf massa_"$version"_release_linux.tar.gz
 mv ./massa ./massa-"$version"
 ln -s ./massa-"$version" ./massa
 
 # Create config.toml
 cd "$massaDirectory"/massa/massa-node/config
-wget http://massa.alphatux.fr/bootstrapper.toml
+wget -q http://massa.alphatux.fr/bootstrapper.toml
 ipv4=$(curl ifconfig.me)
 ipv6=$(curl ifconfig.co)
 echo
