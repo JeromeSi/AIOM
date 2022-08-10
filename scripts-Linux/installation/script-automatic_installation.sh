@@ -8,27 +8,27 @@ no="n"
 qNewUser="Voulez-vous créer un nouvel utilisateur pour Massa ? $yes pour le créer : "
 qUserName="Entrer un nom d'utilisateur : "
 qPassword="Enter un mot de passe : "
-qDirectoryOfMassa="Dans quel dossier j'installe le dosier massa ? "
-tMassaVersion="La version de Massa est :"
+qDirectoryOfMassa="Dans quel dossier j'installe le dossier massa ? "
+tMassaVersion="La version de Massa est : "
 tRunningNode1="Démarrage du node avec "
 tRunningNode2="comme mot de passe"
-qpassWordNode="Mot de passe pour le node, ne le perdez pas ! :"
+qpassWordNode="Mot de passe pour le node, ne le perdez pas ! : "
 qWhatIP="Que version d'IP utilisez-vous ? Répondre 4 ou 6 : "
 mCreateWallet="Création d'un portefeuille.\n Il ne faut pas diffuser votre clé Secrète."
 mAddStaking="Initialise le noeud pour le staking de bloc avec la clé secrète'"
 qChooseWallet="Choisir un wallet : "
-mFaucet="Sur le serveur Discord https://discord.com/invite/massa \n Visiter le cannal #testnet-faucet \n Utiliser l'adresse suivant pour demander 100MASS"
+mFaucet="Sur le serveur Discord https://discord.com/invite/massa \n Visiter le cannal #testnet-faucet \n Utiliser l'adresse suivante pour demander 100MASS"
 mWaitBootStrap="En attente de bootstrap"
 mSuccessfulBootstrap="Bootstrap effectué. Le node a rejoint le réseau Massa."
-mAchat="Quand c'est fait, presser la touche Entrée pour déclencher l'achat d'un roll.'"
+mAchat="Quand c'est fait, presser la touche Entrée pour déclencher l'achat d'un roll."
 mWait="Attendre 10s"
 mDone="C'est fait !"
 mNewWallet="Créer un nouveau wallet"
 mCreateDirectory="Dossier créé $massaDirectory"
 mInstallPackages="Installation des paquets nécessaires"
 mSearchWalletDat="existe-t-il un fichier wallet.dat ?"
-mBootstrapInProgress="Bootstrap en cours"
-mBuyDone="Achat fait, il faut attendre 3 cycles pour les jetons deviennent actifs"
+mBootstrapInProgress="Bootstrap en cours. Patienter..."
+mBuyDone="Achat fait, il faut attendre 3 cycles pour que les jetons (rolls) deviennent actifs."
 mEndMessage="Votre node fonctionne en tâche de fond.\n"
 mFireWall="Ouverture des ports\n31244 : communication entre les noeuds\n31245 : démarrage d'un noeud\n33035 : surveillance activité du noeud"
 mEndMessage="Le noeud MASSA fonctionne"
@@ -63,7 +63,7 @@ fi
 cd "$massaDirectory"
 
 # Current massa version
-version=$(curl -s https://github.com/massalabs/massa | grep "tag/TEST" | awk -F '/' '{print $6}' | sed 's/">//')
+version=$(curl -s https://github.com/massalabs/massa | grep "class.*tag/TEST" | awk -F '/' '{print $6}' | sed 's/">//')
 echo "$tMassaVersion $version"
 wget -q https://github.com/massalabs/massa/releases/download/$version/massa_"$version"_release_linux.tar.gz
 tar xzf massa_"$version"_release_linux.tar.gz
@@ -110,8 +110,8 @@ function runNode()
 	cd "$massaDirectory"/massa/massa-node
 	logfile=$1
 	nohup ./massa-node -p $passWordNode &>> $logfile &
-	sleep 2s
 	echo "$mBootstrapInProgress"
+	sleep 2s
 	while [ "$(grep "Successful bootstrap" $logfile)" == "" ]
 		do
 		sleep 10s
@@ -171,6 +171,7 @@ echo "$mBuyDone"
 #open ports 31244 31245 et 33035
 echo
 echo -e "$mFireWall"
+sudo ufw enable
 sudo ufw allow 31244
 sudo ufw allow 31245
 sudo ufw allow 33035
