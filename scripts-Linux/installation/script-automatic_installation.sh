@@ -27,7 +27,7 @@ mBootstrapInProgress="Bootstrap en cours"
 mBuyDone="Achat fait, il faut attendre 3 cycles pour les jetons deviennent actifs"
 mEndMessage="Votre node fonctionne en tâche de fond.\n"
 mFireWall="Ouverture des ports\n31244 : communication entre les noeuds\n31245 : démarrage d'un noeud\n33035 : surveillance activité du noeud"
-mEndMessage=""
+mEndMessage="Le noeud MASSA fonctionne"
 
 #add package
 echo -e "$mInstallPackages"
@@ -122,20 +122,20 @@ echo -e "$mSearchWalletDat"
 nWalletDat=$(locate wallet.dat | wc -l)
 if [[ $nWalletDat -gt 0 ]]
 	then
-		thelistofwallet=$(echo -e "$(locate wallet.dat)\n$mNewWallet" | cat -n)
-		echo "$thelistofwallet"
+		thelistofwallet=$(echo -e "$(locate wallet.dat)\n$mNewWallet")
+		echo "$thelistofwallet"  | cat -n
 		read -p "$qChooseWallet" rep
 		if [[ $(($nWalletDat+1)) == $rep ]]
 			then
 			runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
 			createWallet
 			else
-			walletFile=$(echo "$thelistofwallet" | sed -n "$rep p" | sed 's/.*\/h/\/h/g')
+			walletFile=$(echo "$thelistofwallet" | sed -n "$rep p")
 			cp $walletFile "$massaDirectory"/massa/massa-client/
-			thelistofnodePrivKey=$(echo -e "$(locate node_privkey.key)" | cat -n)
-			echo "$thelistofnodePrivKey"
+			thelistofnodePrivKey=$(echo -e "$(locate node_privkey.key)")
+			echo "$thelistofnodePrivKey"  | cat -n
 			echo "On utilise le $rep"
-			nodePrivKeyFile=$(echo "$thelistofnodePrivKey" | sed -n "$rep p" | sed 's/.*\/h/\/h/g')
+			nodePrivKeyFile=$(echo "$thelistofnodePrivKey" | sed -n "$rep p")
 			echo "$nodePrivKeyFile"
 			cp "$nodePrivKeyFile" "$massaDirectory"/massa/massa-node/config/
 			runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
@@ -171,5 +171,6 @@ echo -e "$mFireWall"
 sudo ufw allow 31244
 sudo ufw allow 31245
 sudo ufw allow 33035
+sudo ufw status
 
 echo -e "$mEndMessage"
