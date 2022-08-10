@@ -35,8 +35,17 @@ mEndMessage="Le noeud MASSA fonctionne"
 
 #add package
 echo -e "$mInstallPackages"
-sudo apt install wget curl locate ufw
+sudo apt -y install locate
 sudo updatedb
+sudo apt -y install wget curl ufw
+
+#problem with libssl1.1 and ubuntu 22.04
+if hostnamectl | grep "22.04"
+	then
+	wget -q http://fr.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
+	sudo dpkg -i ./libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
+	rm ./libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
+fi
 
 # create a new user ?
 echo
@@ -73,10 +82,10 @@ ln -s ./massa-"$version" ./massa
 # Create config.toml
 cd "$massaDirectory"/massa/massa-node/config
 wget -q http://massa.alphatux.fr/bootstrapper.toml
-ipv4=$(curl ifconfig.me)
-ipv6=$(curl ifconfig.co)
+ipv4=$(curl -s ifconfig.me)
+ipv6=$(curl -s ifconfig.co)
 echo
-echo -e "ipv4 : $ipv4\n ipv6 $ipv6 "
+echo -e "ipv4 : $ipv4\nipv6 : $ipv6 "
 read -p "$qWhatIP" rep
 echo "[network]" > ./config.toml
 if [ $rep == "4" ]

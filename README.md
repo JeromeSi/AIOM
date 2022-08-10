@@ -8,4 +8,6 @@ The script uses[ the bynary version](https://docs.massa.net/en/latest/testnet/in
 
 Tested on Debian 11.4 amd64
 
+Tested on Ubuntu 20.04 amd64
+
 Tested on Ubuntu 22.04 amd64
