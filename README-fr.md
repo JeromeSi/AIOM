@@ -6,7 +6,7 @@ Installation Automatique De [Massa](https://massa.net/)
 
 C'est un script bash pour Ubuntu 20.04 et Debian 11 au départ.
 
-Le script utilise [ la version binaire de Massa](https://docs.massa.net/en/latest/testnet/install.html) of [Massa in github](https://github.com/massalabs/massa).
+Le script utilise [ la version binaire de Massa](https://docs.massa.net/en/latest/testnet/install.html) sur [le github de Massa](https://github.com/massalabs/massa).
 
 Testé sur Debian 11.4 amd64
 
