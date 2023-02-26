@@ -14,4 +14,4 @@ Testé sur Ubuntu 20.04 amd64
 
 Testé sur Ubuntu 22.04 amd64
 
-[Le script](https://github.com/JeromeSi/AIOM/blob/main/scripts-Linux/installation/script-automatic_installation.sh)
+[Le script]([https://github.com/JeromeSi/AIOM/blob/main/scripts-Linux/installation/script-automatic_installation.sh](https://github.com/JeromeSi/AIOM/blob/main/README.md)
