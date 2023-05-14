@@ -153,8 +153,8 @@ function createWallet()
 	./massa-client -p $passWordNode wallet_generate_secret_key
 	echo "$mAddStaking"
 	secretKey=$(./massa-client -p $passWordNode wallet_info | grep "Secret key" | sed 's/Secret key\: //g')
-	echo "node_add_staking_secret_keys $secretKey"
-	./massa-client -p $passWordNode node_add_staking_secret_keys $secretKey
+	echo "node_start_staking $secretKey"
+	./massa-client -p $passWordNode node_start_staking $secretKey
 }
 
 function runNode()
@@ -197,7 +197,7 @@ if [[ $nWalletDat -gt 0 ]]
 			cd "$massaDirectory"/massa/massa-client
 			secretKey=$(./massa-client -p $passWordNode wallet_info | grep "Secret key" | sed 's/Secret key\: //g')
 			echo "node_start_staking $secretKey"
-			./massa-client -p $passWordNode node_add_staking_secret_keys $secretKey
+			./massa-client -p $passWordNode node_start_staking $secretKey
 		fi
 	else
 		runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
