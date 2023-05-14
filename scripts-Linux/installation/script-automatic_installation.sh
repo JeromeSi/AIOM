@@ -2,6 +2,8 @@
 # https://github.com/JeromeSi/AIOM/blob/main/scripts-Linux/installation/script-automatic_installation.sh
 # by Jerome Signouret
 
+#Ajout pour tester
+
 #!/bin/bash
 yes="y"
 no="n"
