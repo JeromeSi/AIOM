@@ -112,6 +112,7 @@ if [ ! -d "$massaDirectory" ]
 	echo "$mCreateDirectory"
 fi
 cd "$massaDirectory"
+rm -rf massa
 
 # Current massa version
 version=$(curl -s https://github.com/massalabs/massa | grep "class.*tag/TEST" | awk -F '/' '{print $6}' | sed 's/">//')
