@@ -35,7 +35,7 @@ then
 	mBuyDone="Achat fait, il faut attendre 3 cycles (1h45) maximum pour que les jetons (rolls) deviennent actifs."
 	mEndMessage="Votre node fonctionne en tâche de fond.\n"
 	mFireWall="Ouverture des ports\n31244 : communication entre les noeuds\n31245 : démarrage d'un noeud\n33035 : surveillance activité du noeud"
-	mEndMessage="Le noeud MASSA fonctionne"
+	mEndMessage="Le noeud MASSA fonctionne. "
 else
 	qNewUser="Do you want to create a new user for Massa ? $yes to create it : "
 	qUserName="Enter the user name : "
@@ -208,12 +208,12 @@ fi
 echo
 echo -e "$mFaucet"
 cd "$massaDirectory"/massa/massa-client/
-address=$(./massa-client -p $passWordNode wallet_info | grep Address | sed 's/Address: //g')
+address=$(./massa-client -p $passWordNode wallet_info | grep Address | sed 's/Address: //g'  | awk -F " " '{print $1}')
 echo "$address"
 read -p "$mAchat" rep
 until [[ $finalBalance -gt 0 ]]
 do
-	finalBalance=$(./massa-client -p $passWordNode wallet_info | grep  "Final balance" | sed 's/.*Final balance: //g')
+	finalBalance=$(./massa-client -p $passWordNode wallet_info | grep  "final" | awk -F "=" '{print $2}' | awk -F "." '{print $1}' | head -n 1)
 	sleep 10s
 	echo "$mWait"
 done
