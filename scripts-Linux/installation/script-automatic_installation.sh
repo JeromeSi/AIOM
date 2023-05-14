@@ -71,6 +71,16 @@ sudo apt -y install locate
 sudo updatedb
 sudo apt -y install wget curl ufw
 
+#open ports 31244 31245 et 33035
+echo
+echo -e "$mFireWall"
+sudo ufw allow 22
+sudo ufw allow 31244
+sudo ufw allow 31245
+sudo ufw allow 33035
+sudo ufw enable
+sudo ufw status
+
 #problem with libssl1.1 and ubuntu 22.04
 if hostnamectl | grep "22.04"
 	then
@@ -185,7 +195,7 @@ if [[ $nWalletDat -gt 0 ]]
 			runNode "$massaDirectory/massa/massa-node/Node-$(date +%F_%T).log"
 			cd "$massaDirectory"/massa/massa-client
 			secretKey=$(./massa-client -p $passWordNode wallet_info | grep "Secret key" | sed 's/Secret key\: //g')
-			echo "node_add_staking_secret_keys $secretKey"
+			echo "node_start_staking $secretKey"
 			./massa-client -p $passWordNode node_add_staking_secret_keys $secretKey
 		fi
 	else
@@ -208,14 +218,5 @@ do
 done
 ./massa-client -p $passWordNode buy_rolls $address 1 0
 echo "$mBuyDone"
-
-#open ports 31244 31245 et 33035
-echo
-echo -e "$mFireWall"
-sudo ufw enable
-sudo ufw allow 31244
-sudo ufw allow 31245
-sudo ufw allow 33035
-sudo ufw status
 
 echo -e "$mEndMessage"
